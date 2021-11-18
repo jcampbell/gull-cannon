@@ -29,6 +29,6 @@ module "project-factory" {
 }
 
 variable "GOOGLE_CREDENTIALS" {  # PLACEHOLDER --> this should never be used
-  type = "string"
-  sensitive = true
+  type                 = string
+  sensitive            = true
 }
