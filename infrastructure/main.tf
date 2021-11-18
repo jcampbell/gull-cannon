@@ -27,3 +27,8 @@ module "project-factory" {
   activate_apis = ["cloudtasks.googleapis.com", "cloudfunctions.googleapis.com"]
   # , "pubsub.googleapis.com", "logging.googleapis.com",
 }
+
+variable "GOOGLE_CREDENTIALS" {  # PLACEHOLDER --> this should never be used
+  type = "string"
+  sensitive = true
+}
