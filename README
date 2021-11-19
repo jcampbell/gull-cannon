@@ -1,1 +1,26 @@
-gull-cannon
+# Gull Cannon
+
+IoT project for saving a dock that needs saving.
+
+# Setup
+
+## APIs
+
+Several APIs must be enabled on the project that manages the service account that will be running terraform, in addition to defaults.
+- cloudbilling.googleapis.com
+- cloudresourcemanager.googleapis.com
+- iam.googleapis.com
+
+## Permissions
+
+Permissions Required for the Service Account used to Manage Terraform:
+ - https://registry.terraform.io/modules/terraform-google-modules/project-factory/google/latest#permissions
+
+### Organization
+- roles/resourcemanager.folderViewer
+- roles/resourcemanager.organizationViewer
+- roles/resourcemanager.projectCreator
+- roles/billing.user
+
+### Project
+- roles/storage.admin

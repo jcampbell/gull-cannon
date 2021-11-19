@@ -19,8 +19,6 @@ module "project-factory" {
 
   name                 = "gull-cannon"
   random_project_id    = true
-  usage_bucket_name    = "gull-cannon-usage-report-bucket"
-  usage_bucket_prefix  = "gull-cannon/1/integration"
   org_id               = "1077903016582"
   billing_account      = "0167E9-D67CAC-E98E9B"
 
