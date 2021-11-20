@@ -43,11 +43,9 @@ resource "google_storage_bucket" "bucket" {
 }
 
 resource "google_storage_bucket_object" "archive" {
-  project = module.project-factory.project_id
   name    = "handler.zip"
   bucket  = google_storage_bucket.bucket.name
   source  = data.archive_file.source.output_path
-
 }
 
 resource "google_cloudfunctions_function" "function" {
