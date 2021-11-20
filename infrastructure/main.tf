@@ -28,9 +28,7 @@ data "google_service_account_access_token" "default" {
 }
 
 module "project-factory" {
-  providers = {
-    google = google.baserate
-  }
+  provider  = google.baserate
   source    = "terraform-google-modules/project-factory/google"
   version   = "~> 10.1"
 

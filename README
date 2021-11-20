@@ -24,3 +24,8 @@ Permissions Required for the Service Account used to Manage Terraform:
 
 ### Project
 - roles/storage.admin
+
+### Service Account
+To allow impersonating the new project's service account (see https://medium.com/google-cloud/terraform-assume-role-and-service-account-impersonation-on-google-cloud-ffc553863e72)
+
+- roles/iam.serviceAccountTokenCreator
