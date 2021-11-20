@@ -25,7 +25,7 @@ data "archive_file" "source" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name     = "cf.gull-cannon.baserate.org"
+  name     = "artifacts.gull-cannon.baserate.org"
   location = "US"
 }
 
