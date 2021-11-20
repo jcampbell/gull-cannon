@@ -14,7 +14,9 @@ Several APIs must be enabled on the project that manages the service account tha
 ## Permissions
 
 Permissions Required for the Service Account used to Manage Terraform:
- - https://registry.terraform.io/modules/terraform-google-modules/project-factory/google/latest#permissions
+- https://registry.terraform.io/modules/terraform-google-modules/project-factory/google/latest#permissions
+
+There is actually a helper script I found only later in the underlying github repo.
 
 ### Organization
 - roles/resourcemanager.folderViewer
@@ -25,7 +27,4 @@ Permissions Required for the Service Account used to Manage Terraform:
 ### Project
 - roles/storage.admin
 
-### Service Account
-To allow impersonating the new project's service account (see https://medium.com/google-cloud/terraform-assume-role-and-service-account-impersonation-on-google-cloud-ffc553863e72)
-
-- roles/iam.serviceAccountTokenCreator
+To create a storage account owned by a domain, the storage account must also be a verified owner of the domain (

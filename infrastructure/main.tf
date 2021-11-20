@@ -9,7 +9,7 @@ terraform {
 }
 
 provider "google" {
-  region = "us-east-1"
+  region = "us-east1"
 }
 
 module "project-factory" {
