@@ -8,27 +8,7 @@ terraform {
   }
 }
 
-provider "google" {
-  alias   = "baserate"
-  project = "warm-drive-332522"
-  region  = "us-east1"
-}
-
-provider "google" {
-  project      = module.project-factory.project_id
-  region       = "us-east-1"
-  access_token = data.google_service_account_access_token.default.access_token
-}
-
-data "google_service_account_access_token" "default" {
-  provider               = "google.baserate"
-  target_service_account = module.project-factory.api_s_account_fmt
-  scopes                 = ["userinfo-email", "cloud-platform"]
-  lifetime               = "300s"
-}
-
 module "project-factory" {
-  provider  = google.baserate
   source    = "terraform-google-modules/project-factory/google"
   version   = "~> 10.1"
 
@@ -39,6 +19,11 @@ module "project-factory" {
 
   activate_apis = ["cloudtasks.googleapis.com", "cloudfunctions.googleapis.com"]
   # , "pubsub.googleapis.com", "logging.googleapis.com",
+}
+
+provider "google" {
+  project      = module.project-factory.project_id
+  region       = "us-east-1"
 }
 
 locals {
