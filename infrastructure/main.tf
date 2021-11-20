@@ -10,18 +10,7 @@ terraform {
 
 provider "google" {
   region = "us-east1"
-}
-
-module "project-factory" {
-  source  = "terraform-google-modules/project-factory/google"
-  version = "~> 10.1"
-
-  name              = "gull-cannon"
-  random_project_id = true
-  org_id            = "1077903016582"
-  billing_account   = "0167E9-D67CAC-E98E9B"
-
-  activate_apis = ["cloudbuild.googleapis.com", "cloudtasks.googleapis.com", "cloudfunctions.googleapis.com"]
+  project = "warm-drive-332522"
 }
 
 locals {
@@ -38,7 +27,6 @@ data "archive_file" "source" {
 resource "google_storage_bucket" "bucket" {
   name     = "cf.gull-cannon.baserate.org"
   location = "US"
-  project  = module.project-factory.project_id
 }
 
 resource "google_storage_bucket_object" "archive" {
@@ -48,8 +36,6 @@ resource "google_storage_bucket_object" "archive" {
 }
 
 resource "google_cloudfunctions_function" "function" {
-  project = module.project-factory.project_id
-
   name        = "gull-cannon"
   description = "gull-cannon logger"
   runtime     = "python39"
