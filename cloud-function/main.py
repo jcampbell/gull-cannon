@@ -1,6 +1,7 @@
 import os
 import logging
 
+import flask
 from sqlalchemy.engine import create_engine
 
 from sqlalchemy import Column
@@ -36,6 +37,10 @@ def handler(request):
     checkin = Checkin(headers=headers, payload=payload)
 
     run_transaction(sessionmaker(bind=engine), lambda s: s.add(checkin))
+    return flask.jsonify({
+        "sleep": 10000,
+        "fire": False
+    })
 
 
 if __name__ == "__main__":

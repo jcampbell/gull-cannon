@@ -21,8 +21,8 @@ module "project-factory" {
   org_id            = "1077903016582"
   billing_account   = "0167E9-D67CAC-E98E9B"
 
+  activate_api_identities = ["gcf-admin-robot.iam.gserviceaccount.com", "cloudbuild.gserviceaccount.com", "gcp-sa-cloudbuild.iam.gserviceaccount.com"]
   activate_apis = ["cloudbuild.googleapis.com", "cloudtasks.googleapis.com", "cloudfunctions.googleapis.com"]
-  # ,"appengine.googleapis.com", "pubsub.googleapis.com", "logging.googleapis.com",
 }
 
 locals {
