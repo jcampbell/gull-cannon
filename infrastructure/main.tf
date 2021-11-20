@@ -8,9 +8,13 @@ terraform {
   }
 }
 
+provider "google" {
+  region = "us-east-1"
+}
+
 module "project-factory" {
-  source    = "terraform-google-modules/project-factory/google"
-  version   = "~> 10.1"
+  source  = "terraform-google-modules/project-factory/google"
+  version = "~> 10.1"
 
   name              = "gull-cannon"
   random_project_id = true
@@ -18,12 +22,7 @@ module "project-factory" {
   billing_account   = "0167E9-D67CAC-E98E9B"
 
   activate_apis = ["cloudtasks.googleapis.com", "cloudfunctions.googleapis.com"]
-  # , "pubsub.googleapis.com", "logging.googleapis.com",
-}
-
-provider "google" {
-  project      = module.project-factory.project_id
-  region       = "us-east-1"
+  # ,"appengine.googleapis.com", "pubsub.googleapis.com", "logging.googleapis.com",
 }
 
 locals {
@@ -40,15 +39,20 @@ data "archive_file" "source" {
 resource "google_storage_bucket" "bucket" {
   name     = "project-bucket"
   location = "US"
+  project  = module.project-factory.project_id
 }
 
 resource "google_storage_bucket_object" "archive" {
-  name   = "handler.zip"
-  bucket = google_storage_bucket.bucket.name
-  source = data.archive_file.source.output_path
+  project = module.project-factory.project_id
+  name    = "handler.zip"
+  bucket  = google_storage_bucket.bucket.name
+  source  = data.archive_file.source.output_path
+
 }
 
 resource "google_cloudfunctions_function" "function" {
+  project = module.project-factory.project_id
+
   name        = "gull-cannon"
   description = "gull-cannon logger"
   runtime     = "python39"
@@ -73,19 +77,3 @@ resource "google_cloudfunctions_function_iam_member" "invoker" {
   member = "allUsers"
 }
 
-variable "CONNECTION_STRING" {
-  type      = string
-  sensitive = true
-}
-
-output "trigger_url" {
-  value = google_cloudfunctions_function.function.https_trigger_url
-}
-
-output "project_name" {
-  value = module.project-factory.project_name
-}
-
-output "project_id" {
-  value = module.project-factory.project_id
-}
