@@ -21,7 +21,7 @@ module "project-factory" {
   org_id            = "1077903016582"
   billing_account   = "0167E9-D67CAC-E98E9B"
 
-  activate_apis = ["cloudtasks.googleapis.com", "cloudfunctions.googleapis.com"]
+  activate_apis = ["cloudbuild.googleapis.com", "cloudtasks.googleapis.com", "cloudfunctions.googleapis.com"]
   # ,"appengine.googleapis.com", "pubsub.googleapis.com", "logging.googleapis.com",
 }
 
