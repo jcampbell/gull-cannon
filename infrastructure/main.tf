@@ -37,7 +37,7 @@ data "archive_file" "source" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name     = "project-bucket"
+  name     = "cf.gull-cannon.baserate.org"
   location = "US"
   project  = module.project-factory.project_id
 }
