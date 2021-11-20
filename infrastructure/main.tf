@@ -9,7 +9,7 @@ terraform {
 }
 
 provider "google" {
-  region = "us-east1"
+  region  = "us-east1"
   project = "warm-drive-332522"
 }
 
@@ -29,11 +29,11 @@ resource "google_storage_bucket" "bucket" {
   location = "US"
 }
 
-resource "google_storage_bucket_object" "archive" {
-  name    = "handler.zip"
-  bucket  = google_storage_bucket.bucket.name
-  source  = data.archive_file.source.output_path
-}
+#resource "google_storage_bucket_object" "archive" {
+#  name    = "handler.zip"
+#  bucket  = google_storage_bucket.bucket.name
+#  source  = data.archive_file.source.output_path
+#}
 
 resource "google_cloudfunctions_function" "function" {
   name        = "gull-cannon"
