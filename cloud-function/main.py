@@ -106,7 +106,7 @@ def handler(request):
         ]
 
     return flask.jsonify({
-        "open_actions": action_assignments
+        "open_actions": open_actions
     })
 
 
