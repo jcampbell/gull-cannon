@@ -25,6 +25,7 @@ if not connection_string:
 engine = create_engine(connection_string)
 Session = sessionmaker(engine)
 
+
 class Checkin(Base):
     __tablename__ = 'checkins'
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.uuid_generate_v4())
@@ -88,7 +89,7 @@ def handler(request):
     with Session() as session:
         open_actions = session.execute(
             select(Action).where(Action.username == user.username, Action.completed == False)
-        ).all()
+        ).scalars()
         action_assignments += [
             {
                 "action": action.action,
