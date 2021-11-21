@@ -70,10 +70,9 @@ def handler(request):
         action = action_request.get("action", "noop")
         if action in RECOGNIZED_ACTIONS:
             action_obj = Action(
-                username = user.username,
+                username=user.username,
                 action=action,
-                duration=action_request.get("duration", 1000),
-                dispatched=False
+                duration=action_request.get("duration", 1000)
             )
             run_transaction(Session, lambda s: s.add(action_obj))
 
