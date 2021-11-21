@@ -72,7 +72,7 @@ def handler(request):
             action_obj = Action(
                 username = user.username,
                 action=action,
-                duration=action_request.get("params", {}).get("duration", 1000),
+                duration=action_request.get("duration", 1000),
                 dispatched=False
             )
             run_transaction(Session, lambda s: s.add(action_obj))
@@ -89,9 +89,7 @@ def handler(request):
         "action_requests": [
             {
                 "action": "sleep",
-                "params": {
-                    "duration": random.randint(8, 12)
-                }
+                "duration": random.randint(8, 12) * 1000
             }
         ]
     })
