@@ -32,3 +32,4 @@ jobs:
         runtime: python39
         region: us-east1
         source_dir: ./cloud-function/
+        env_vars: ${{ secrets.HANDLER_ENV_VARS }}
