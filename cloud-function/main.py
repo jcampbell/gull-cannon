@@ -32,7 +32,7 @@ class Checkin(Base):
 
 def handler(request):
     headers = dict(request.headers)
-    payload = request.json()
+    payload = request.json
     checkin = Checkin(headers=headers, payload=payload)
 
     run_transaction(sessionmaker(bind=engine), lambda s: s.add(checkin))
