@@ -91,7 +91,7 @@ def handler(request):
         ).scalars()
         open_actions += [
             {
-                "id": action.id,
+                "id": str(action.id),
                 "action": action.action,
                 "duration": action.duration
             }
