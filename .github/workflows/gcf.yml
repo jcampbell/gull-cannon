@@ -1,0 +1,34 @@
+name: Deploy function to GCP
+
+on:
+  push:
+    branches:
+    - main
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+
+jobs:
+  deploy-handler:
+    name: Deploy Handler
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Setup gcloud CLI
+    - uses: google-github-actions/setup-gcloud@master
+      with:
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        project_id: ${{ secrets.GCP_PROJECT }}
+        export_default_credentials: true
+
+    - name: Deploy Handler
+      uses: google-github-actions/deploy-cloud-functions@main
+      with:
+        name: gull-cannon
+        entry_point: handler
+        runtime: python39
+        region: us-east1
+        source_dir: ./cloud-function/

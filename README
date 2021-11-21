@@ -3,6 +3,18 @@
 IoT project for saving a dock that needs saving.
 
 # Setup
+1. Add new project.
+2. Enable Cloud Functions API
+3. Setup Service account
+- Create the service account
+- Grant it Cloud Functions Admin role
+- Create a key for the service account, and add the key as a repo secret to the repo, using the name GCP_SA_KEY
+
+
+
+# OLD - UNUSED
+
+I tried originally to use the terraform google cloud project factory, but found that its opinionation was slightly too far from the beaten path for me, at least insofar as my attempted integration with terraform cloud.
 
 ## APIs
 
