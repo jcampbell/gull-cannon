@@ -85,20 +85,21 @@ def handler(request):
             return {"error": str(e)}
         run_transaction(Session, lambda s: s.execute(update(Action).where(Action.id == id).values(completed=completed)))
 
-    action_assignments = []
+    open_actions = []
     with Session() as session:
-        open_actions = session.execute(
+        actions = session.execute(
             select(Action).where(Action.username == user.username, Action.completed == False)
         ).scalars()
-        action_assignments += [
+        open_actions += [
             {
+                "id": action.id,
                 "action": action.action,
                 "duration": action.duration
             }
-            for action in open_actions
+            for action in actions
         ]
 
-    action_assignments += [
+    open_actions += [
             {
                 "action": "sleep",
                 "duration": random.randint(8, 12) * 1000
@@ -106,7 +107,7 @@ def handler(request):
         ]
 
     return flask.jsonify({
-        "action_assignments": action_assignments
+        "open_actions": action_assignments
     })
 
 
