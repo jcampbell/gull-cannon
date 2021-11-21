@@ -58,7 +58,7 @@ def handler(request):
     if not is_valid:
         return message, 404
 
-    user : User = message.get("user")
+    user: User = message.get("user")
     headers = dict(request.headers)
     payload = request.json
     checkin = Checkin(headers=headers, payload=payload)
@@ -82,15 +82,30 @@ def handler(request):
             completed = action_update.get("completed", True)
         except ValueError as e:
             return {"error": str(e)}
-        run_transaction(Session, lambda s: s.execute(update(Action).where(Action.id == id).vaalues(completed=completed)))
+        run_transaction(Session, lambda s: s.execute(update(Action).where(Action.id == id).values(completed=completed)))
 
-    return flask.jsonify({
-        "action_requests": [
+    action_assignments = []
+    with Session() as session:
+        open_actions = session.execute(
+            select(Action).where(Action.username == user.username, Action.completed == False)
+        ).all()
+        action_assignments += [
+            {
+                "action": action.action,
+                "duration": action.duration
+            }
+            for action in open_actions
+        ]
+
+    action_assignments += [
             {
                 "action": "sleep",
                 "duration": random.randint(8, 12) * 1000
             }
         ]
+
+    return flask.jsonify({
+        "action_assignments": action_assignments
     })
 
 

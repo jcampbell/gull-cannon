@@ -3,7 +3,7 @@ import uuid
 import pytest
 from sqlalchemy import select
 
-from main import Session, Checkin
+from main import Session, Checkin, Action
 
 
 def test_example():
@@ -25,3 +25,7 @@ def test_uuid():
 def test_random():
     import random
     assert 8 <= random.randint(8, 12) <= 12
+
+
+def test_build_action():
+    Action(username="james.p.campbell@gmail.com", action="fire", duration=1000)
