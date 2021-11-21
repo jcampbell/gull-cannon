@@ -40,9 +40,6 @@ class User(Base):
     token = Column(CHAR(40), index=True)
 
 
-RECOGNIZED_ACTIONS = {"fire", "sleep"}
-
-
 class Action(Base):
     __tablename__ = 'actions'
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.uuid_generate_v4(), index=True)
@@ -69,13 +66,15 @@ def handler(request):
     action_updates = payload.get("action_updates", [])
     for action_request in action_requests:
         action = action_request.get("action", "noop")
-        if action in RECOGNIZED_ACTIONS:
+        if action == "fire":
             action_obj = Action(
                 username=user.username,
                 action=action,
                 duration=action_request.get("duration", 1000)
             )
             run_transaction(Session, lambda s: s.add(action_obj))
+        else:
+            logger.warning(f"skipping unrecognized action: {action}")
 
     for action_update in action_updates:
         try:
