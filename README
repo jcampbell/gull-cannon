@@ -5,11 +5,13 @@ IoT project for saving a dock that needs saving.
 # Setup
 1. Add new project.
 2. Enable Cloud Functions API
-3. Setup Service account
+3. Enable Cloud Build API
+4. Setup Service account
 - Create the service account
 - Grant it Cloud Functions Admin role
 - Create a key for the service account, and add the key as a repo secret to the repo, using the name GCP_SA_KEY
-
+5. Deploy function by pushing code
+6. Manually add the allUsers principle as an invoker of the function
 
 
 # OLD - UNUSED
