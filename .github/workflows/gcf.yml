@@ -30,6 +30,7 @@ jobs:
         name: gull-cannon
         entry_point: handler
         runtime: python39
+        memory_mb: 128
         region: us-east1
         source_dir: ./cloud-function/
         env_vars: ${{ secrets.HANDLER_ENV_VARS }}

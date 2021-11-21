@@ -17,7 +17,6 @@ Base = declarative_base()
 connection_string = os.environ.get("CONNECTION_STRING")
 if not connection_string:
     logger.error("No connection string available; please set CONNECTION_STRING environment variable.")
-    logger.error("Using ephemeral database")
     exit()
 
 engine = create_engine(connection_string)
@@ -32,7 +31,7 @@ class Checkin(Base):
 
 
 def handler(request):
-    headers = dict(request.headers())
+    headers = dict(request.headers)
     payload = request.json()
     checkin = Checkin(headers=headers, payload=payload)
 
