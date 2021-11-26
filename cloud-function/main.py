@@ -5,13 +5,14 @@ from sqlalchemy import select, update, desc
 from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 from sqlalchemy_cockroachdb import run_transaction
 
-from db import Session, User, Checkin, Action, CallbackDelay
+from db import get_sessionmaker, User, Checkin, Action, CallbackDelay
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 def load_user(request):
+    Session = get_sessionmaker()
     logger.debug("logging checkin")
     headers = dict(request.headers)
     payload = request.json
@@ -22,7 +23,7 @@ def load_user(request):
     try:
         bearer = request.headers.get("Authorization")
         token = bearer.split()[1]
-    except IndexError:
+    except (IndexError, AttributeError):
         return {
             "error": "unable to parse authorization token"
         }, 404
@@ -36,6 +37,7 @@ def load_user(request):
 
 
 def get_actions(request):
+    Session = get_sessionmaker()
     include_completed: bool = bool(request.args.get("include_completed", False))
     include_all: bool = bool(request.args.get("include_all", False))
     conditions = []
@@ -56,7 +58,7 @@ def get_actions(request):
             }
             for action in actions
         ]
-        callback_delay = session.execute(select(CallbackDelay.interval).order_by(CallbackDelay.updated_at, desc).limit(1)).scalar_one()
+        callback_delay = session.execute(select(CallbackDelay.interval).order_by(CallbackDelay.updated_at.desc()).limit(1)).scalar_one()
 
     return {
         "actions": open_actions,
@@ -65,6 +67,7 @@ def get_actions(request):
 
 
 def create_action(request):
+    Session = get_sessionmaker()
     action = request.json.get("action", "noop")
     if action == "fire":
         action_obj = Action(
@@ -82,6 +85,7 @@ def create_action(request):
 
 
 def update_action(request):
+    Session = get_sessionmaker()
     id_: uuid = request.json.get("id", "")
     try:
         id_ = uuid.UUID(id_)
@@ -93,7 +97,9 @@ def update_action(request):
 
 
 def handler(request):
-    load_user(request)
+    load_user_error = load_user(request)
+    if load_user_error is not None:
+        return load_user_error
     if request.method == "GET":
         return get_actions(request)
     elif request.method == "POST":

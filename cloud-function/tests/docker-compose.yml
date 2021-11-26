@@ -1,0 +1,16 @@
+version: '3.2'
+services:
+  db:
+    image: cockroachdb/cockroach:v21.2.0
+    command:
+      - "start-single-node"
+      - "--insecure"
+    networks:
+      - roachnet
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+
+networks:
+  roachnet:
+    driver: bridge
