@@ -1,11 +1,9 @@
-import json
 import uuid
 
 from flask import Flask, request
 import pytest
-from sqlalchemy import select
 
-from db import Checkin, Action, init_db, get_sessionmaker
+from db import Action, init_db
 from main import handler
 
 
@@ -54,7 +52,7 @@ def test_add_action(client):
     client.get("/gull-cannon/actions", headers={"Authorization": "Bearer: abcdefghijklmnopqrstuvwxyz0123456789abcd"})
     res = handler(request)
     assert res[0]["delay"] == 5 * 60 * 1000
-    assert len(res[0]["actions"]) > 1
+    assert len(res[0]["actions"]) >= 1
     assert res[1] == 200
 
 
