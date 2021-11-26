@@ -22,26 +22,5 @@ def test_uuid():
     assert "badly formed hexadecimal UUID string" in str(exc.value)
 
 
-def test_random():
-    import random
-    assert 8 <= random.randint(8, 12) <= 12
-
-
 def test_build_action():
     Action(username="james.p.campbell@gmail.com", action="fire", duration=1000)
-
-
-def test_build_open_actions():
-    action_assignments = []
-    with Session() as session:
-        open_actions = session.execute(
-            select(Action).where(Action.username == "james.p.campbell@gmail.com", Action.completed == False)
-        ).scalars()
-
-        action_assignments += [
-            {
-                "action": action.action,
-                "duration": action.duration
-            }
-            for action in open_actions
-        ]

@@ -1,93 +1,52 @@
-import os
 import logging
 import uuid
-import random
 
-import flask
-from sqlalchemy.engine import create_engine
-
-from sqlalchemy import Column, CHAR, BOOLEAN, ForeignKey, select, BIGINT, update
-from sqlalchemy.dialects.postgresql import UUID, JSONB, TIMESTAMP, TEXT
+from sqlalchemy import select, update, desc
 from sqlalchemy.exc import MultipleResultsFound, NoResultFound
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship
-from sqlalchemy.sql import func
 from sqlalchemy_cockroachdb import run_transaction
+
+from db import Session, User, Checkin, Action, CallbackDelay
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-Base = declarative_base()
-connection_string = os.environ.get("CONNECTION_STRING")
-if not connection_string:
-    logger.error("No connection string available; please set CONNECTION_STRING environment variable.")
-    exit()
 
-engine = create_engine(connection_string)
-Session = sessionmaker(engine)
-
-
-class Checkin(Base):
-    __tablename__ = 'checkins'
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.uuid_generate_v4())
-    datetime = Column(TIMESTAMP(timezone=True), server_default=func.now())
-    headers = Column(JSONB)
-    payload = Column(JSONB)
-
-
-class User(Base):
-    __tablename__ = 'users'
-    username = Column(TEXT, primary_key=True)
-    token = Column(CHAR(40), index=True)
-
-
-class Action(Base):
-    __tablename__ = 'actions'
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.uuid_generate_v4(), index=True)
-    username = Column(TEXT, ForeignKey("users.username"))
-    user = relationship(User)
-    datetime = Column(TIMESTAMP(timezone=True), server_default=func.now())
-    action = Column(TEXT, nullable=False)
-    duration = Column(BIGINT, default=1000)
-    completed = Column(BOOLEAN, default=False)
-
-
-def handler(request):
-    is_valid, message = check_token(request)
-    if not is_valid:
-        return message, 404
-
-    user: User = message.get("user")
+def load_user(request):
+    logger.debug("logging checkin")
     headers = dict(request.headers)
     payload = request.json
     checkin = Checkin(headers=headers, payload=payload)
-
     run_transaction(Session, lambda s: s.add(checkin))
-    action_requests = payload.get("action_requests", [])
-    action_updates = payload.get("action_updates", [])
-    for action_request in action_requests:
-        action = action_request.get("action", "noop")
-        if action == "fire":
-            action_obj = Action(
-                username=user.username,
-                action=action,
-                duration=action_request.get("duration", 1000)
-            )
-            run_transaction(Session, lambda s: s.add(action_obj))
-        else:
-            logger.warning(f"skipping unrecognized action: {action}")
 
-    for action_update in action_updates:
+    logger.debug("Getting authentication token")
+    try:
+        bearer = request.headers.get("Authorization")
+        token = bearer.split()[1]
+    except IndexError:
+        return {
+            "error": "unable to parse authorization token"
+        }, 404
+
+    with Session() as session:
         try:
-            id = uuid.UUID(action_update.get("id"))
-            completed = action_update.get("completed", True)
-        except ValueError as e:
-            return {"error": str(e)}
-        run_transaction(Session, lambda s: s.execute(update(Action).where(Action.id == id).values(completed=completed)))
+            user = session.execute(select(User).where(User.token == token)).scalar_one()
+            request.user = user
+        except (NoResultFound, MultipleResultsFound):
+            return {"error": "unrecognized token"}, 404
 
+
+def get_actions(request):
+    include_completed: bool = bool(request.args.get("include_completed", False))
+    include_all: bool = bool(request.args.get("include_all", False))
+    conditions = []
+    if not include_completed:
+        conditions += [Action.completed == False]
+    if not include_all:
+        conditions += [Action.username == request.user.username]
     open_actions = []
     with Session() as session:
         actions = session.execute(
-            select(Action).where(Action.username == user.username, Action.completed == False)
+            select(Action).where(*conditions)
         ).scalars()
         open_actions += [
             {
@@ -97,36 +56,48 @@ def handler(request):
             }
             for action in actions
         ]
+        callback_delay = session.execute(select(CallbackDelay.interval).order_by(CallbackDelay.updated_at, desc).limit(1)).scalar_one()
 
-    open_actions += [
-            {
-                "action": "sleep",
-                "duration": random.randint(8, 12) * 1000
-            }
-        ]
-
-    return flask.jsonify({
-        "open_actions": open_actions
-    })
+    return {
+        "actions": open_actions,
+        "delay": callback_delay
+    }, 200
 
 
-def check_token(request):
-    logger.debug("Getting authentication token")
+def create_action(request):
+    action = request.json.get("action", "noop")
+    if action == "fire":
+        action_obj = Action(
+            username=request.user.username,
+            action=action,
+            duration=request.json.get("duration", 1000)
+        )
+        run_transaction(Session, lambda s: s.add(action_obj))
+    elif action == "update_callback_interval":
+        new_interval = CallbackDelay(updated_by=request.user.username, interval=request.json.get("interval", 5*30*1000))
+        run_transaction(Session, lambda s: s.add(new_interval))
+    else:
+        logger.warning(f"skipping unrecognized action: {action}")
+    return {"status": "ok"}, 201
+
+
+def update_action(request):
+    id_: uuid = request.json.get("id", "")
     try:
-        bearer = request.headers.get("Authorization")
-        token = bearer.split()[1]
-    except IndexError:
-        return False, {
-            "error": "unable to parse authorization token"
-        }
-
-    with Session() as session:
-        try:
-            user = session.execute(select(User).where(User.token == token)).scalar_one()
-            return True, {"user": user}
-        except (NoResultFound, MultipleResultsFound):
-            return False, {"error": "unrecognized token"}
+        id_ = uuid.UUID(id_)
+    except ValueError as e:
+        return {"error": str(e)}, 500
+    completed = request.json.get("completed", True)
+    run_transaction(Session, lambda s: s.execute(update(Action).where(Action.id == id_).values(completed=completed)))
+    return {"status": "ok"}, 200
 
 
-if __name__ == "__main__":
-    Base.metadata.create_all(engine)
+def handler(request):
+    load_user(request)
+    if request.method == "GET":
+        return get_actions(request)
+    elif request.method == "POST":
+        return create_action(request)
+    elif request.method == "PUT":
+        return update_action(request)
+    return {"error": "unrecognized method"}, 500
