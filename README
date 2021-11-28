@@ -1,6 +1,48 @@
 # Gull Cannon
-
 IoT project for saving a dock that needs saving.
+
+# Project Goals
+
+1. Reliable. Cannot leak propane. :)
+2. Remote activated.
+3. Learn something about circuits.
+
+# Surprises / Gotchas / Learnings
+
+1. Power
+
+I tested power using a multimeter; this was actually my first time testing current using the tool. Nominally, it has two settings, one for up to 10 amps, which it says should work for current between 200 milliamps and 10 amps, and one for less than 200 milliamps. I did not find a way to use the smaller setting -- it actually seemed to prevent enough current draw to power on the Nano IoT 33.
+
+Measurements (all taken with 12v battery):
+- 0.67 amps with solenoid activated (but I think there's a peak current draw higher than that)
+- 0.062 amps briefly when connecting to Wifi, approx 3 seconds
+- 0.027 amps during wifi regular (wifi) operation, approx 5 seconds
+- 0.001 - 0.002 amps during sleep
+
+Given that the battery is 7ah:
+- (0.62 * 3 / 3600) + (0.27 * 5 / 3600) = 0.000891 amp-hours per checkin
+- 0.002 amp-hours per hour of sleep
+- (0.67 * 3 / 60) = 0.0335 amp-hours per fire
+
+Assuming 1 fire per day, checkins every minute, and ignoring overlap:
+- (0.000891 * 60 * 24) + (0.002 * 24) + (0.3356) = 1.666 amp-hours per day
+
+With a 10 watt solar panel. If it gets 5 hours of sunlight a day, we'd easily have indefinite runtime. If we had a 2 watt solar panel
+
+2. Firmware of wifi, need to have the right certificates
+
+It's not entirely clear to me how to describe what "Arduino" means. It's a platform, but seems to be more about the ecosystem and interface for doing the microcontruller programming than it is actual hardware platforms, even though those are critical.
+
+I ended did most of the development on an Arduino Uno Wifi Rev 2; Just before doing a permanent wire-up, I shorted it and burned up the board. I finished development on an Arduino Nano IoT 33; I love the small size, and it was nice to not have headers and so get to solder it onto a mini breadboard.
+
+3. Circuit Design; Flyback Diodes Oh My
+
+Initially, I wired the diode incorrectly. That led me to go up to a bigger diode that is almost certainly overkill. I didn't really know how to measure or calculate very much about the circuit when I got started, so that was very much an in-process evolution. I found circuitlab through the AskElectronics redit and/or similar stack exchange site where I found others who were asking identical questions to mine, and I think that helped me get a much better grasp of things once I was able to develop a model of the circuit and understand how it was actually expected to behave.
+
+3. Design of the API was a pain
+4. I <3 cloud functions, but it was a hack to have multiple verbs/routes handled by a single function
+
+
 
 # Setup
 1. Add new project.
