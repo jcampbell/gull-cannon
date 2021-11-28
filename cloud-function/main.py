@@ -97,13 +97,28 @@ def update_action(request):
 
 
 def handler(request):
+    if request.method == 'OPTIONS':
+        # Allows GET requests from any origin with the Content-Type
+        # header and caches preflight response for an 3600s
+        headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Max-Age': '3600'
+        }
+
+        return '', 204, headers
+
+    headers = {
+        'Access-Control-Allow-Origin': '*'
+    }
     load_user_error = load_user(request)
     if load_user_error is not None:
-        return load_user_error
+        return *load_user_error, headers
     if request.method == "GET":
-        return get_actions(request)
+        return *get_actions(request), headers
     elif request.method == "POST":
-        return create_action(request)
+        return *create_action(request), headers
     elif request.method == "PUT":
-        return update_action(request)
+        return *update_action(request), headers
     return {"error": "unrecognized method"}, 500
