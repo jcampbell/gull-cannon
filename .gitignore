@@ -3,3 +3,6 @@ arduino_secrets.h
 .terraform
 .env
 .env.yaml
+node_modules
+*.pyc
+__pycache__
