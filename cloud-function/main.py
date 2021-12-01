@@ -36,6 +36,29 @@ def load_user(request):
             return {"error": "unrecognized token"}, 404
 
 
+def get_checkins(request):
+    try:
+        limit: int = int(request.args.get("limit", 10))
+    except ValueError:
+        limit: int = 10
+
+    Session = get_sessionmaker()
+    with Session() as session:
+        checkins = session.execute(
+            select([Checkin.id, Checkin.datetime]).order_by(Checkin.datetime.desc()).limit(limit)
+        ).fetchall()
+
+    return ({
+        "checkins": [
+            {
+                "id": str(checkin[0]),
+                "datetime": checkin[1].strftime("%Y-%m-%d %H:%M:%S %Z"),
+            }
+            for checkin in checkins
+        ]
+    }, 200)
+
+
 def get_actions(request):
     Session = get_sessionmaker()
     include_completed: bool = bool(request.args.get("include_completed", False))
@@ -116,7 +139,10 @@ def handler(request):
     if load_user_error is not None:
         return *load_user_error, headers
     if request.method == "GET":
-        return *get_actions(request), headers
+        if request.path.endswith("/checkins"):
+            return *get_checkins(request), headers
+        else:
+            return *get_actions(request), headers
     elif request.method == "POST":
         return *create_action(request), headers
     elif request.method == "PUT":
