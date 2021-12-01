@@ -1,11 +1,13 @@
 {
-  "name": "gatsby-starter-default",
+  "name": "gull-cannon-web",
   "private": true,
-  "description": "A simple starter to get up and developing quickly with Gatsby",
+  "description": "IoT with a bang.",
   "version": "0.1.0",
-  "author": "Kyle Mathews <mathews.kyle@gmail.com>",
+  "author": "James Campbell <james.p.campbell@gmail.com>",
   "dependencies": {
+    "antd": "^4.17.2",
     "gatsby": "^4.2.0",
+    "gatsby-plugin-antd": "^2.2.0",
     "gatsby-plugin-gatsby-cloud": "^4.2.0",
     "gatsby-plugin-image": "^2.2.0",
     "gatsby-plugin-manifest": "^4.2.0",
@@ -37,9 +39,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/gatsbyjs/gatsby-starter-default"
+    "url": "https://github.com/jcampbell/gull-cannon"
   },
   "bugs": {
-    "url": "https://github.com/gatsbyjs/gatsby/issues"
+    "url": "https://github.com/jcampbell/gull-cannon/issues"
   }
 }
